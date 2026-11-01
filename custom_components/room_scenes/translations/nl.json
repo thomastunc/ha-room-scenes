@@ -1,0 +1,20 @@
+{
+  "config": {
+    "abort": {"single_instance_allowed": "Room Scenes is al ingesteld."},
+    "step": {
+      "user": {
+        "title": "Room Scenes",
+        "description": "Hue-achtige kamerscènes. Sla scènes optioneel op in je Zigbee2MQTT-lampen voor direct, synchroon oproepen.",
+        "data": {"z2m_enabled": "Zigbee2MQTT-scènesync inschakelen", "z2m_base_topic": "Zigbee2MQTT basis-topic"}
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Room Scenes",
+        "data": {"z2m_enabled": "Zigbee2MQTT-scènesync inschakelen", "z2m_base_topic": "Zigbee2MQTT basis-topic"}
+      }
+    }
+  }
+}

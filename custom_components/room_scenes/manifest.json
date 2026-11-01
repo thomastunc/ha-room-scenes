@@ -1,0 +1,14 @@
+{
+  "domain": "room_scenes",
+  "name": "Room Scenes",
+  "after_dependencies": ["mqtt"],
+  "codeowners": ["@thomastunc"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "websocket_api"],
+  "documentation": "https://github.com/thomastunc/ha-room-scenes",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/thomastunc/ha-room-scenes/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
