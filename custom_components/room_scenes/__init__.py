@@ -209,13 +209,11 @@ async def _register_frontend(hass: HomeAssistant, preset_data: dict) -> None:
     paths = [
         StaticPathConfig(PANEL_JS_URL, os.path.join(frontend, "room_scenes_panel.js"), True),
         StaticPathConfig(CARD_JS_URL, os.path.join(frontend, "room_scenes_card.js"), True),
-        StaticPathConfig(f"{ASSETS_URL}/iconset.js", os.path.join(BASE_PATH, "res", "iconset.js"), True),
         StaticPathConfig(f"{ASSETS_URL}/img", os.path.join(BASE_PATH, "assets"), True),
         StaticPathConfig(f"{ASSETS_URL}/custom", CUSTOM_ASSETS_PATH, False),
     ]
     await hass.http.async_register_static_paths(paths)
     hass.http.register_view(PresetDataView(preset_data))
-    add_extra_js_url(hass, f"{ASSETS_URL}/iconset.js?v={VERSION}")
     add_extra_js_url(hass, f"{CARD_JS_URL}?v={VERSION}")
     domain_data["frontend_registered"] = True
 

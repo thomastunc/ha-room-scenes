@@ -1,0 +1,7 @@
+Room Scenes
+Copyright 2026 Thomas
+
+This product is a fork of Scene Presets (https://github.com/Hypfer/hass-scene_presets),
+Copyright Sören Beye (Hypfer), licensed under the Apache License, Version 2.0.
+Preset data, preset images (AI-generated, see custom_components/room_scenes/assets/Readme.md),
+colour management and dynamic scene logic originate from that project and have been modified.

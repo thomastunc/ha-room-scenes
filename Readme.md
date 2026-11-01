@@ -1,100 +1,95 @@
-<div align="center">
-    <img src="assets/logo/github_banner.svg" width="600" alt="scene_presets">
-</div>
-<br/>
+# Room Scenes
 
-This custom_component is an implementation of an idea not all too dissimilar to what the Philips Hue app calls Scenes.
-Apart from that though, it has nothing to do with Hue. No bridge required.
+Hue-style room scenes for Home Assistant. No bridge or vendor app required.
 
-Everything has been implemented entirely inside this custom_component, meaning that it works with every `light` entity.
-No vendor restrictions. No need for special bridges.
-And, most importantly, no account required :-)
+Room Scenes builds on your Home Assistant **areas**. Every area with lights becomes a room with its own
+scenes, a brightness slider and a gradient that shows what the lights are doing right now. Scenes are
+real `scene.*` entities, so you can use them in dashboards, automations, voice assistants and on remotes.
 
-## Screenshots
+<p>
+  <img src="docs/img/home.png" width="23%" alt="Rooms overview" />
+  <img src="docs/img/room.png" width="23%" alt="Room with scenes" />
+  <img src="docs/img/editor.png" width="23%" alt="Scene editor" />
+  <img src="docs/img/card.png" width="23%" alt="Dashboard card" />
+</p>
 
-![ui.png](./img/ui.png)
+## Features
 
-![service.png](./img/service.png)
+- **Rooms from your areas.** Lights are picked up automatically, including lights on devices in that area.
+- **My scenes per room.** You can save the current lights, a gallery preset, or a scene you build light by light with a colour wheel and white-temperature slider. Edits preview live on your lamps.
+- **Scene gallery.** Includes the full preset collection from [Scene Presets](https://github.com/Hypfer/hass-scene_presets). Tap one to try it in the room, then save it as a scene.
+- **Dynamic scenes.** Colours slowly drift through a preset's palette.
+- **Active scene tracking.** The room shows which scene is on. It clears the scene as soon as someone changes a light.
+- **Relative room brightness.** Like Hue, the room slider scales all lights relative to each other instead of setting them all to the same level.
+- **Scene entities.** One `scene.<room>_<scene>` per scene, already placed in the right area.
+- **Zigbee2MQTT scene sync (optional).** Scenes can be stored *on the lamps* as native Zigbee scenes. Recall then uses one group command, so lamps switch in sync with no "popcorn" effect, and it works even when Home Assistant is down.
+- **Lovelace card.** `custom:room-scenes-card` shows a room tile plus its scenes. It loads automatically, so you don't need to add a resource.
+- English and Dutch UI, light and dark theme.
 
+## Installation (HACS)
 
-## Installation
+1. HACS → ⋮ → *Custom repositories* → add this repository as type **Integration**.
+2. Install **Room Scenes** and restart Home Assistant.
+3. *Settings → Devices & services → Add integration → Room Scenes*.
+4. Open **Room Scenes** in the sidebar.
 
-1. Add the repository as a custom repository of type `integration` in HACS: https://hacs.xyz/docs/faq/custom_repositories/
-2. Restart Home Assistant
-3. Navigate to Settings > Devices & Services
-4. Click Add integration
-5. Search for Scene Presets
-6. Click on it and follow the wizard 🧙
+Make sure your lights are assigned to areas. Room Scenes only shows areas that contain at least one light.
 
-You should now have a new item in your sidebar.
+## Zigbee2MQTT scene sync
 
-## Usage
+1. Create a Zigbee2MQTT group with the lamps of a room. You probably already have one if you use binding.
+2. In Room Scenes, open the room → ⚙ → pick the group. A matching group is marked *(suggested)*.
+3. Save or re-save a scene. Room Scenes puts the lamps in the scene's state and sends `scene_store` to the group.
 
-The `scene_presets` component can either be used via its UI or by calling its services in automations, scripts etc.
+When you activate the scene, Room Scenes sends a single `scene_recall` to the group. Room lights that are
+not in the group are still set through Home Assistant. Dynamic scenes always run through Home Assistant.
 
-It is compatible with any color-capable light entity. Additionally, it will also try its best to map colors to a matching
-color temperature if it encounters a light that only features tunable white capabilities.
+Each Zigbee group gets its own scene IDs (1–254). Deleting a scene also removes it from the lamps.
 
+## Remote: cycle through scenes
 
-### UI Usage
+Map a button (for example the Hue button on a Hue dimmer) to:
 
-To get to know what is possible, I'd recommend opening up the UI first and playing around for a bit.<br/>
-For that, simply open the Home Assistant sidebar, navigate to "Scene Presets", select your lights and then click on a preset tile to apply it.
+```yaml
+action: room_scenes.cycle_scenes
+data:
+  area_id: keuken
+```
 
-The UI will remember your favorite presets, your last selected targets and the last state of your tunables in your browser's local storage.<br/>
-This means that it is persistent but not synced across devices.
+The scene order can be changed under room settings (⚙).
 
-The tunables section allows you to further customize how the preset should be applied.<br/>
-In normal mode, you have the following options:
-- Shuffle - Whether or not the colors should be shuffled before applying them to the provided list of targets
-- Smart Shuffle - Attempt to create smooth color transitions when shuffling. See [the docs](./docs/Smart%20Shuffle.md) for more info
-- Custom brightness - Override the brightness specified in the preset
-- Custom transition - Default transition time in normal mode is 1s
+## Services
 
-#### Dynamic Scenes
+| Service | Purpose |
+|---|---|
+| `room_scenes.activate_scene` | Activate by room scene ID or `scene.*` entity |
+| `room_scenes.cycle_scenes` | Next scene in a room |
+| `room_scenes.set_room_brightness` | Relative room brightness (1–100 %) |
+| `room_scenes.apply_preset` | Apply a gallery preset to any target (Scene Presets compatible) |
+| `room_scenes.start_dynamic_scene` / `stop_*` | Dynamic scenes (Scene Presets compatible) |
 
-If you enable the `dynamic` toggle, you will have `Dynamic Scenes`.<br/>
-These are endless loops that apply the same preset with `smart shuffled` colors every `interval` with a `transition` as specified.
+## Dashboard card
 
-`Dynamic Scenes` can be useful to e.g. have ambient lighting that constantly changes but does so mostly unnoticeable.<br/>
-For that effect to work, you of course need to pick suitably long durations for `interval` and `transition`.
+```yaml
+type: custom:room-scenes-card
+area: woonkamer
+show_scenes: true        # optional, default true
+tap_action: open_panel   # or "none"
+```
 
-You can see all active dynamic scenes at the top of the UI. To stop them, just tap them.
+## Development
 
-Furthermore, you should know that<br/>
-- a dynamic scene will automatically stop once you turn off all lights it was active on.
-- a dynamic scene will be stopped if a second one is started that would also interact with a light that is already part of the first one.
-- if you turn off parts of the lights that are part of a dynamic scene, they will not be turned back on by it.
-- dynamic scenes can put a lot of strain on your zigbee network if you pick many lights and very short intervals.
-- dynamic scenes may suffer from different lights having different command delays. Picking a longer transition time helps to mask that.
-- dynamic scenes do not survive a restart of home assistant. This is intentional.
-- dynamic scenes will on first iteration always use a transition of 0.5s and no smart shuffle for instant results and to make sure to get all colors of the selected preset into the rotation.
+```bash
+npm install
+npm run build      # builds custom_components/room_scenes/frontend/*.js
+npm run watch
+```
 
-### Service usage
+The frontend uses Preact and esbuild and is fully self-styled, so it doesn't depend on internal Home Assistant
+elements apart from `ha-icon` and `ha-card`.
 
-The UI is not the only way to use this component. In fact, it too just calls the services provided by it.
+## Credits
 
-You can use the services to e.g. bind scene presets to a button on a remote or someone entering a room or maybe even a voice command.
-
-To make this easier, you can use the UI, do the action you'd like to do and then click on the robot icon on the top right.<br/>
-This will then open a dialog that looks like this with a copy-pasteable service call for easy automation:
-
-![last_action_payload.png](./img/last_action_payload.png)
-
-### Advanced usage
-
-For advanced usage, use the Home Assistant DevTools and call the services provided by the custom_component directly.<br/>
-Preset IDs can be found in the overview here: [assets](./custom_components/scene_presets/assets/Readme.md)
-
-If you're a developer, you can also add your own presets by creating a json file.<br/>
-Check the [docs page on that](./docs/Custom%20Presets.md) for more info.
-
-
-## Docs
-
-Check out the [./docs/](./docs) folder.
-
-## Misc
-
-Check out the [assets](./custom_components/scene_presets/assets/Readme.md) folder for a list with all presets available.
-All of them have been manually extracted in a clean-room way by setting a group of lights to a scene and then noting the different x,y values + its name.
+This is a fork of [Hypfer/hass-scene_presets](https://github.com/Hypfer/hass-scene_presets) (Apache-2.0).
+The preset collection, colour logic and dynamic scenes come from there. Room Scenes is not affiliated with
+Signify or Philips Hue.

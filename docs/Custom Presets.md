@@ -6,7 +6,7 @@ Be advised though that this feature will not hold your hand. It is intended to b
 
 ## How
 
-On startup, the custom_component will create folder named `userdata/custom` inside `custom_components/scene_presets`
+On startup, the custom_component will create folder named `userdata/custom` inside `custom_components/room_scenes`
 of your home assistant instance. By default, this folder will be empty apart from another folder named `assets`.
 
 To add custom presets, you create a `presets.json` in that folder and add your custom images to that `assets` folder.
@@ -26,7 +26,7 @@ The best way to explain this feature is to give an example.
 First the directory structure:
 
 ```
-user@foo:/homeassistant/custom_components/scene_presets# tree userdata/
+user@foo:/homeassistant/custom_components/room_scenes# tree userdata/
 userdata/
 └── custom
     ├── assets

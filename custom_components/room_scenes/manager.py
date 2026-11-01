@@ -83,6 +83,12 @@ class RoomSceneManager:
     async def async_load(self) -> None:
         data = await self.store.async_load() or {}
         self.scenes = {s["id"]: s for s in data.get("scenes", [])}
+        for scene in self.scenes.values():
+            if scene.get("preset_id"):
+                try:
+                    scene["preset_id"] = get_preset(self.preset_data, scene["preset_id"])["id"]
+                except vol.Invalid:
+                    pass
         self.rooms = data.get("rooms", {})
         self.active = data.get("active", {})
         if self.z2m:
@@ -208,6 +214,12 @@ class RoomSceneManager:
 
     async def async_save_scene(self, raw: dict) -> dict:
         scene = SCENE_SCHEMA(raw)
+        if scene.get("preset_id"):
+            try:
+                scene["preset_id"] = get_preset(self.preset_data, scene["preset_id"])["id"]
+            except vol.Invalid:
+                scene["preset_id"] = None
+                scene["dynamic"] = False
         is_new = "id" not in scene or scene["id"] not in self.scenes
         if is_new:
             scene["id"] = uuid.uuid4().hex[:12]
